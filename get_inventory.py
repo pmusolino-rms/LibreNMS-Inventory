@@ -6,6 +6,8 @@ import json
 import sys
 import csv
 import pandas
+import datetime
+import bs4
 from IPython.core.display import display, HTML
 from pivottablejs import pivot_ui
 from pprint import pprint
@@ -17,6 +19,7 @@ API_VERSION="/v0"
 API_URI="https://" + API_HOST + API_ROOT + API_VERSION
 CA_BUNDLE='./bundle.trust.crt'
 CSV_FILE='/tmp/dev.csv'
+DATE = datetime.datetime.now()
 HTML_FILE='/opt/librenms/html/device_inventory.html'
 NMS_DEVICE_URL=API_HOST + "/device/device="
 RANCID="rancid-host.example.com/repo/src/master/configs/"
@@ -56,3 +59,10 @@ with open(CSV_FILE, 'w') as csvfile:
 
 df = pandas.read_csv(CSV_FILE)
 pivot_ui(df,outfile_path=HTML_FILE,rows=['sysName','hostname','ip','hardware','os','version','features','serial','location','nms','rancid'])
+with open(HTML_FILE) as myfile:
+        txt = myfile.read()
+            soup = bs4.BeautifulSoup(txt, features="html.parser")
+
+            soup.head.append("Last Edit: " + DATE.strftime("%Y-%m-%d %H:%M"))
+            with open(HTML_FILE, "w") as outfile:
+                    outfile.write(str(soup))
